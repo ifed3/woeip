@@ -11,14 +11,17 @@
 <br>
 <br>
 <font size="5" color="green" style="margin-left:5%" >Upload data</font>
+<form name = "form" enctype = "multipart/form-data" 
+         action = "{% url "upload" %}" method = "POST" >
 <div id="output" style="min-height: 200px; white-space: pre; border: 2px dashed grey;margin-left:5%;margin-right:5%;"
      ondragenter="document.getElementById('output').textContent = 'Let go.'; event.stopPropagation(); event.preventDefault(); "
      ondragover="event.stopPropagation(); event.preventDefault(); 
      "
      ondrop="event.stopPropagation(); event.preventDefault();
-     dodrop(event);">
+     dodrop(event); action = "{% url "upload" %}" method = "POST" ">
      <div align="center" color ="grey" >Drop your files here <br> <font size="1"> Files must be from DusTrak and GPS devices. </font></div>
 </div>
+</form>
 <br>
 <br>
 <!-- Manual Upload Form-->
@@ -31,7 +34,7 @@
       
          
             <!-- Upload form, as  of now more than 2 files are allowed but causes program to not work if there are multiple files with extension .csv or .log-->
-            <form id="upload-form" method="POST" enctype="multipart/form-data"style="margin-right: 25%;">
+            <form id="upload-form" method="POST" enctype="multipart/form-data" action = "{% url "upload" %}" method = "POST" style="margin-right: 25%;">{% csrf_token %}
               <!-- Allows upload of files -->
                 <input type="file" name="file" multiple>
                 <!-- Submit button -->
