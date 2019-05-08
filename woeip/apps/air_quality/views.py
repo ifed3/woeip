@@ -16,10 +16,14 @@ def upload(request):
     """Upload data for a session collected using the Dustrak air quality device and a separate GPS
     log file.
     """
+    logger.info('calling upload')
     request_user = request.user
     if request.method == 'POST':
+        logger.info('post request')
         form = forms.DustrakSessionForm(request.POST, request.FILES)
         form_instance = form.instance
+        logger.info('form is valid')
+        logger.info(form.is_valid())
         if form.is_valid():
             form.save()
             try:
