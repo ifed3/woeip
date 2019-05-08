@@ -12,3 +12,12 @@ class DustrakSessionForm(forms.ModelForm):
     class Meta():
         model = models.Session
         fields = ('collected_by', 'date_collected', 'route', 'air_quality', 'gps', 'timezone')
+
+
+class UploadSessionForm(forms.ModelForm):
+    air_quality = forms.FileField()
+    gps = forms.FileField()
+
+    class Meta():
+        model = models.Session
+        fields = ('air_quality', 'gps')

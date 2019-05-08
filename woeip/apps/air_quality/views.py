@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from django.contrib import messages
@@ -13,17 +14,36 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def upload(request):
-    """Upload data for a session collected using the Dustrak air quality device and a separate GPS
-    log file.
-    """
     logger.info('calling upload')
     request_user = request.user
     if request.method == 'POST':
         logger.info('post request')
-        form = forms.DustrakSessionForm(request.POST, request.FILES)
+        form = forms.UploadSessionForm(
+            request.POST, request.FILES,
+            initial={'date_collected': datetime.datetime.now()})
         form_instance = form.instance
         logger.info('form is valid')
         logger.info(form.is_valid())
+        if form.is_valid():
+            logger.info('Process files here and redirect to verify data.')
+    else:
+        form = forms.UploadSessionForm(initial={'collected_by': request_user})
+
+    return render(request, 'air_quality/upload.html', {
+        'user': request_user, 'form': form, 'upload_page': 'active'})
+
+
+@login_required
+def verify_data(request):
+    """Verify data for a session collected using the Dustrak air quality device and a separate GPS
+    log file.
+    """
+    request_user = request.user
+    if request.method == 'POST':
+        form = forms.DustrakSessionForm(
+            request.POST, request.FILES,
+            initial={'date_collected': datetime.datetime.now()})
+        form_instance = form.instance
         if form.is_valid():
             form.save()
             try:

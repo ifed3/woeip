@@ -1,16 +1,18 @@
 {% extends '__base.html' %}
 {% block content %}
-<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
 <font size="5" color="green" style="margin-left:5%" >Upload data</font>
 
 
 <form name="form" enctype="multipart/form-data" action="{% url 'upload' %}" method="POST">
 <div id="output" style="min-height: 200px; white-space: pre;
-	 border: 2px dashed grey;margin-left:5%;margin-right:5%;"
-     ondragenter="document.getElementById('output').textContent = 'Let go.'; event.stopPropagation(); event.preventDefault(); "
+     border: 2px dashed grey; margin-left:5%; margin-right:5%;"
+
+     ondragenter="
+     document.getElementById('output').textContent = 'Let go.'; event.stopPropagation(); event.preventDefault(); "
      ondragover="event.stopPropagation(); event.preventDefault();"
      ondrop="event.stopPropagation(); event.preventDefault();
-     dodrop(event);">
+     doDrop(event);">
      <div align="center" color="grey">Drop your files here <br> <font size="1">
      Files must be from DusTrak and GPS devices. </font>
  </div>
@@ -18,154 +20,134 @@
 </form>
 <br>
 <br>
+
 <!-- Manual Upload Form-->
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Submit</button>
+</form>
 
 
-<kd style='margin-top:0;margin-left:25%;margin-right:25%;'>
-          <div align="center" ><font size="4">Or</font>
-          <br>
-    <!-- Upload form, as  of now more than 2 files are allowed but causes program to not work if there are multiple files with extension .csv or .log-->
-    <form id="upload-form" method="POST" enctype="multipart/form-data" action = "{% url 'upload' %}" style="margin-right: 25%;">{% csrf_token %}
-      <!-- Allows upload of files -->
-        <input type="file" name="file" multiple>
-        <!-- Submit button -->
-        <input type="submit" value="Find files on your computer.">
-
-    </form>
-
-
-
-
-
-    </div>
 <!-- Code for drag and drop -->
 <script type="text/javascript">
-	Array.prototype.contains = function ( needle ) {
-	   for (i in this) {
-	      if (this[i] == needle) return true;
-	   }
-	   return false;
-	}
-	function ondrag(event)
-	{
-		output("Let go.");
-	}
+    Array.prototype.contains = function ( needle ) {
+       var array = this;
+       for (var i in array) {
+          if (array[i] == needle) return true;
+       }
+       return false;
+    };
 
-	function dodrop(event)
-	{
-	  var maxFileSize = 100000000000000000000000000000000000000000000000000000000000000000000000000000;
-	  var count = 0;
-	  var dt = event.dataTransfer;
-	  var files = dt.files;
-	  var extensions = ['','','','','','',''];
-	  var count = files.length;
-	  output("File Count: " + count + "\n");
-	  var numbers = [null,null];
-	  //output("extensions"+extensions.length)
-	  	if (files.length >= 2) {
-	  		//output("File Count: " + count + "\n");
-	  		for (var i = 0; i < files.length; i++) {
-	  			//output(files[i].name)
-	  			extensions[i] = getext(files[i].name);
-	  			if (extensions[i] == 'log') {
-	  				numbers[0] = i;
-	  			} else if (extensions[i] == 'csv') {
-	  				numbers[1] = i;
-	  			}
-	  			//output(extensions[i]+" ")
+    function ondrag(event)
+    {
+        displayText("Let go.");
+    }
 
-	    	}
+    function doDrop(event)
+    {
+      var maxFileSize = 100000000000000000000000000000000000000000000000000000000000000000000000000000;
+      var count = 0;
+      var dt = event.dataTransfer;
+      var files = dt.files;
+      var fileIndices = [null, null];
+      fileCount = files.length;
+      displayText("File Count: " + fileCount + "\n");
 
-	    	if (extensions.contains('log') && extensions.contains('csv')) {
-	    		//output(extensions);
-	    		output("Uploading...");
-	    		air_quality = files[numbers[1]];
-		    	gps = files[numbers[0]];
-		    	create_post(air_quality,gps);
-	    		/*if (calculatefileSize(files) < maxFileSize) {
-		    		air_quality = files[numbers[1]];
-		    		gps = files[numbers[0]];
-		    		create_post(air_quality,gps);
-	    	    } else {
-	    	    	output("File size is larger than max file size.")
-	    	    }*/
+      if (fileCount == 2) {
+        for (var i = 0; i < fileCount; i++) {
+            extension = getExt(files[i].name);
+            if (extension == 'log') {
+                fileIndices[0] = i;
+            } else if (extension == 'csv') {
+                fileIndices[1] = i;
+            }
 
-	    	} else {
-	    		output("Incorrect file types. Takes 1 csv and 1 gps log file.");
-	    	}
+        }
 
-	  	} else {
-	  		output("Requires two files, a csv and a log file.");
-	  	}
+        if (~fileIndices.contains(null)) {
+            displayText("Uploading...");
+            if (calculatefileSize(files) < maxFileSize) {
+                air_quality = files[fileIndices[1]];
+                gps = files[fileIndices[0]];
+                createPost(air_quality,gps);
+            } else {
+                output("File size is larger than max file size.");
+            }
 
-	}
-	function calculatefileSize(files)
-	{
-		var totalsize = files[0];
-		for (var i =1; i < files.length; i++) {
-			totalsize += files[i].size;
-		}
-		return totalsize;
-	}
+        } else {
+            displayText("Incorrect file types. Takes 1 csv and 1 gps log file.");
+        }
 
-	function output(text)
-	{
-	  document.getElementById("output").textContent = text;
-	  //dump(text);
-	}
-	//Gets extension for the file
-	function getext(filename)
-	{
-		return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) : undefined;
-	}
+        } else {
+            displayText("Requires two files, a csv and a log file.");
+        }
 
-	// AJAX for posting
-	function create_post(air_quality,gps) {
-	    console.log("create post is working!")
+    }
+    function calculateFileSize(files)
+    {
+        var totalsize = files[0];
+        for (var i =1; i < files.length; i++) {
+            totalsize += files[i].size;
+        }
+        return totalsize;
+    }
 
-	    /*$.ajax({
-	        url : "/files/upload/", // the endpoint
-	        type : "POST", // http method
-	        data : { air_Quality : air_quality }, // data sent with the post request
-	        processData: false,
-	        contentType: false,
-	        // handle a successful response
-	        success : function(json) {
+    function displayText(text) {
+      document.getElementById("output").textContent = text;
+    }
 
-	            console.log(json); // log the returned json to the console
-	            console.log("success");
-	        },
+    //Gets extension for the file
+    function getExt(filename) {
+        return (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) : undefined;
+    }
 
-	        // handle a non-successful response
-	        error : function(xhr,errmsg,err) {
-	            $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-	                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
-	            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-	        }
-	    });
-	    $.ajax({
-	        url : "/files/upload/", // the endpoint
-	        type : "POST", // http method
-	        data : { GPS : gps }, // data sent with the post request
-	        processData: false,
-	        contentType: false,
-	        // handle a successful response
-	        success : function(json) {
-	            $('#post-text').val(''); // remove the value from the input
-	            console.log(json); // log the returned json to the console
-	            console.log("success");
-	        },
+    // AJAX for posting
+    function createPost(air_quality,gps) {
+        console.log("create post is working!");
 
-	        // handle a non-successful response
-	        error : function(xhr,errmsg,err) {
-	            $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
-	                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
-	            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-	        }
-	    });*/
-	};
+        /*$.ajax({
+            url : "/files/upload/", // the endpoint
+            type : "POST", // http method
+            data : { air_Quality : air_quality }, // data sent with the post request
+            processData: false,
+            contentType: false,
+            // handle a successful response
+            success : function(json) {
+
+                console.log(json); // log the returned json to the console
+                console.log("success");
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+                    " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+        $.ajax({
+            url : "/files/upload/", // the endpoint
+            type : "POST", // http method
+            data : { GPS : gps }, // data sent with the post request
+            processData: false,
+            contentType: false,
+            // handle a successful response
+            success : function(json) {
+                $('#post-text').val(''); // remove the value from the input
+                console.log(json); // log the returned json to the console
+                console.log("success");
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+                    " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });*/
+    }
 
 
 </script>
 {% endblock %}
-
