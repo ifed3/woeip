@@ -62,17 +62,16 @@
             } else if (extension == 'csv') {
                 fileIndices[1] = i;
             }
-
         }
 
         if (~fileIndices.contains(null)) {
             displayText("Uploading...");
-            if (calculatefileSize(files) < maxFileSize) {
+            if (calculateFileSize(files) < maxFileSize) {
                 air_quality = files[fileIndices[1]];
                 gps = files[fileIndices[0]];
                 createPost(air_quality,gps);
             } else {
-                output("File size is larger than max file size.");
+                displayText("File size is larger than max file size.");
             }
 
         } else {
@@ -86,8 +85,8 @@
     }
     function calculateFileSize(files)
     {
-        var totalsize = files[0];
-        for (var i =1; i < files.length; i++) {
+        var totalsize = 0;
+        for (var i=0; i < files.length; i++) {
             totalsize += files[i].size;
         }
         return totalsize;
