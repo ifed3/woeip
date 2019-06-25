@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'woeip.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db(),
+    'default': env.db(engine='django.contrib.gis.db.backends.postgis'),
 }
 
 # Password validation
