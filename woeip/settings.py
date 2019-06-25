@@ -11,6 +11,10 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
+# Required for GeoDjango GIS usage
+GEOS_LIBRARY_PATH = env('GEOS_LIBRARY_PATH')
+GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
+
 # NOTE: This setting assumes all requests are proxied through a web server (e.g. nginx). If that is not the case,
 # ensure this is set to a more restrictive value. See https://docs.djangoproject.com/en/2.1/ref/settings/#allowed-hosts
 # for more information.
